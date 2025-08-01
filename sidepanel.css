@@ -1,0 +1,87 @@
+body {
+  width: 300px;
+  font-family: sans-serif;
+  padding: 10px;
+}
+
+.description {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+a {
+  display: block;
+  margin-bottom: 10px;
+}
+
+button {
+  margin-bottom: 10px;
+}
+
+.workflow {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.workflow li {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.workflow p {
+  margin: 0 0 10px 0;
+  font-weight: normal;
+}
+
+.input-group {
+  display: flex;
+}
+
+.input-group input {
+  flex-grow: 1;
+  margin-right: 5px;
+}
+
+#socialActivityLink,
+#extractStatsBtn,
+#copyJsonBtn {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  padding: 8px;
+  box-sizing: border-box;
+  text-decoration: none;
+  background-color: #0077b5;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+#copyJsonBtn {
+  margin-top: 10px;
+  background-color: #4CAF50;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+  font-size: 12px;
+}
+
+th {
+  background-color: #f2f2f2;
+}

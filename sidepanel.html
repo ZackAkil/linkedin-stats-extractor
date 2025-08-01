@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>LinkedIn Watcher</title>
+    <link rel="stylesheet" type="text/css" href="sidepanel.css" />
+  </head>
+  <body>
+    <h1>LinkedIn Stats Extractor</h1>
+    <ol class="workflow">
+      <li>
+        <p><strong>Step 1:</strong> Set your LinkedIn username.</p>
+        <div class="input-group">
+          <input type="text" id="usernameInput" placeholder="e.g., zackakil" />
+          <button id="saveUsernameBtn">Save</button>
+        </div>
+      </li>
+      <li>
+        <p><strong>Step 2:</strong> Go to your activity page.</p>
+        <a
+          id="socialActivityLink"
+          href="https://www.linkedin.com/in/zackakil/recent-activity/all/"
+          target="_blank"
+          >Go to Social Activity</a
+        >
+      </li>
+      <li>
+        <p><strong>Step 3:</strong> Extract your post stats.</p>
+        <button id="extractStatsBtn">Extract Stats</button>
+      </li>
+    </ol>
+    <button id="copyJsonBtn" style="display: none">Copy as JSON</button>
+    <div id="statsResult"></div>
+    <script src="sidepanel.js"></script>
+  </body>
+</html>
