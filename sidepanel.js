@@ -184,9 +184,20 @@ function scrapeStats() {
             let reposts = 0;
 
             if (socialCounts) {
-              const likesEl = socialCounts.querySelector('.social-details-social-counts__reactions-count');
-              if (likesEl) {
-                likes = parseInt(likesEl.innerText.replace(/,/g, '')) || 0;
+              // First, try to find the fallback number which is more reliable
+              const fallbackLikesEl = socialCounts.querySelector('.social-details-social-counts__social-proof-fallback-number');
+              if (fallbackLikesEl) {
+                likes = parseInt(fallbackLikesEl.innerText.replace(/,/g, ''), 10) || 0;
+              } else {
+                // If not found, try the other selector and parse the text
+                const likesEl = socialCounts.querySelector('.social-details-social-counts__reactions-count, .social-details-social-counts__count-value');
+                if (likesEl) {
+                  const likesText = likesEl.innerText.trim();
+                  const match = likesText.match(/[\d,]+/);
+                  if (match) {
+                    likes = parseInt(match[0].replace(/,/g, ''), 10) || 0;
+                  }
+                }
               }
 
               const commentsEl = socialCounts.querySelector('.social-details-social-counts__comments .social-details-social-counts__count-value');
