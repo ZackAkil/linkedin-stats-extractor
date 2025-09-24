@@ -5,14 +5,39 @@ document.addEventListener('DOMContentLoaded', function() {
   var usernameInput = document.getElementById('usernameInput');
   var saveUsernameBtn = document.getElementById('saveUsernameBtn');
   var copyJsonBtn = document.getElementById('copyJsonBtn');
+  var configColumnsBtn = document.getElementById('configColumnsBtn');
+  var columnConfig = document.getElementById('columnConfig');
+  var columnList = document.getElementById('columnList');
+  var saveColumnOrderBtn = document.getElementById('saveColumnOrderBtn');
+  var cancelColumnOrderBtn = document.getElementById('cancelColumnOrderBtn');
+  var resetColumnOrderBtn = document.getElementById('resetColumnOrderBtn');
 
   let extractedData = [];
+  
+  // Default column configuration
+  const defaultColumns = [
+    { id: 'author', label: 'Author', visible: true },
+    { id: 'content', label: 'Content', visible: true },
+    { id: 'impressions', label: 'Impressions', visible: true },
+    { id: 'likes', label: 'Likes', visible: true },
+    { id: 'comments', label: 'Comments', visible: true },
+    { id: 'reposts', label: 'Reposts', visible: true },
+    { id: 'totalEngagement', label: 'Total Engagement', visible: true },
+    { id: 'url', label: 'URL', visible: true },
+    { id: 'date', label: 'Date', visible: true },
+    { id: 'postId', label: 'Post ID', visible: true }
+  ];
+  
+  let columnOrder = [...defaultColumns];
 
-  // Load saved username and update link
-  chrome.storage.local.get('linkedinUsername', function(data) {
+  // Load saved username and column order
+  chrome.storage.local.get(['linkedinUsername', 'columnOrder'], function(data) {
     if (data.linkedinUsername) {
       usernameInput.value = data.linkedinUsername;
       socialActivityLink.href = `https://www.linkedin.com/in/${data.linkedinUsername}/recent-activity/all/`;
+    }
+    if (data.columnOrder) {
+      columnOrder = data.columnOrder;
     }
   });
 
@@ -32,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
     chrome.tabs.create({ url: socialActivityLink.href });
   });
 
-    copyJsonBtn.addEventListener('click', function() {
+  copyJsonBtn.addEventListener('click', function() {
     if (extractedData.length > 0) {
       const jsonString = JSON.stringify(extractedData, null, 2);
       navigator.clipboard.writeText(jsonString).then(() => {
@@ -44,7 +69,183 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-    extractStatsBtn.addEventListener('click', function() {
+  // Column configuration handlers
+  configColumnsBtn.addEventListener('click', function() {
+    showColumnConfig();
+  });
+
+  saveColumnOrderBtn.addEventListener('click', function() {
+    saveColumnOrder();
+  });
+
+  cancelColumnOrderBtn.addEventListener('click', function() {
+    // Reload saved settings when canceling
+    chrome.storage.local.get('columnOrder', function(data) {
+      if (data.columnOrder) {
+        columnOrder = data.columnOrder;
+      } else {
+        columnOrder = [...defaultColumns];
+      }
+      columnConfig.style.display = 'none';
+      statsResult.style.display = 'block';
+    });
+  });
+
+  resetColumnOrderBtn.addEventListener('click', function() {
+    columnOrder = [...defaultColumns];
+    showColumnConfig();
+  });
+
+  function showColumnConfig() {
+    columnConfig.style.display = 'block';
+    statsResult.style.display = 'none';
+    
+    // Clear and populate column list
+    columnList.innerHTML = '';
+    columnOrder.forEach((col, index) => {
+      const li = document.createElement('li');
+      li.dataset.columnId = col.id;
+      li.dataset.index = index;
+      li.innerHTML = `
+        <div class="column-controls">
+          <button class="arrow-btn up-btn" ${index === 0 ? 'disabled' : ''} data-index="${index}">▲</button>
+          <button class="arrow-btn down-btn" ${index === columnOrder.length - 1 ? 'disabled' : ''} data-index="${index}">▼</button>
+        </div>
+        <label>
+          <input type="checkbox" ${col.visible ? 'checked' : ''} data-column="${col.id}">
+          ${col.label}
+        </label>
+      `;
+      
+      // Add arrow button listeners
+      const upBtn = li.querySelector('.up-btn');
+      const downBtn = li.querySelector('.down-btn');
+      
+      if (upBtn && !upBtn.disabled) {
+        upBtn.addEventListener('click', () => moveColumn(index, -1));
+      }
+      
+      if (downBtn && !downBtn.disabled) {
+        downBtn.addEventListener('click', () => moveColumn(index, 1));
+      }
+      
+      columnList.appendChild(li);
+    });
+  }
+
+  function moveColumn(index, direction) {
+    const newIndex = index + direction;
+    
+    if (newIndex < 0 || newIndex >= columnOrder.length) return;
+    
+    // Swap in the array
+    const temp = columnOrder[index];
+    columnOrder[index] = columnOrder[newIndex];
+    columnOrder[newIndex] = temp;
+    
+    // Re-render immediately
+    showColumnConfig();
+  }
+
+  function saveColumnOrder() {
+    // Update visibility based on checkboxes
+    const checkboxes = columnList.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+      const columnId = checkbox.dataset.column;
+      const column = columnOrder.find(col => col.id === columnId);
+      if (column) {
+        column.visible = checkbox.checked;
+      }
+    });
+    
+    // Save to chrome storage
+    chrome.storage.local.set({ 'columnOrder': columnOrder }, function() {
+      columnConfig.style.display = 'none';
+      statsResult.style.display = 'block';
+      
+      // Re-render table if data exists
+      if (extractedData.length > 0) {
+        renderTable(extractedData);
+      }
+    });
+  }
+
+  function renderTable(posts) {
+    statsResult.innerHTML = '';
+    const table = document.createElement('table');
+    
+    // Create header based on column order
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    
+    columnOrder.forEach(col => {
+      if (col.visible) {
+        const th = document.createElement('th');
+        th.textContent = col.label;
+        headerRow.appendChild(th);
+      }
+    });
+    
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    
+    // Create body
+    const tbody = document.createElement('tbody');
+    posts.forEach(post => {
+      const row = document.createElement('tr');
+      
+      columnOrder.forEach(col => {
+        if (col.visible) {
+          const td = document.createElement('td');
+          
+          switch(col.id) {
+            case 'author':
+              td.innerHTML = `<a href="${post.authorProfile}" target="_blank">${post.authorName}</a>`;
+              break;
+            case 'content':
+              td.textContent = post.content;
+              break;
+            case 'impressions':
+              td.textContent = post.impressions;
+              break;
+            case 'likes':
+              td.textContent = post.likes;
+              break;
+            case 'comments':
+              td.textContent = post.comments;
+              break;
+            case 'reposts':
+              td.textContent = post.reposts;
+              break;
+            case 'totalEngagement':
+              td.textContent = post.totalEngagement;
+              break;
+            case 'url':
+              td.innerHTML = `<a href="${post.postUrl}" target="_blank">View Post</a>`;
+              break;
+            case 'date':
+              td.textContent = post.datePosted;
+              break;
+            case 'postId':
+              td.textContent = post.postId;
+              break;
+          }
+          
+          row.appendChild(td);
+        }
+      });
+      
+      tbody.appendChild(row);
+    });
+    
+    table.appendChild(tbody);
+    statsResult.appendChild(table);
+    
+    copyJsonBtn.style.display = 'inline-block';
+    configColumnsBtn.style.display = 'inline-block';
+  }
+
+  extractStatsBtn.addEventListener('click', function() {
     extractStatsBtn.disabled = true;
     extractStatsBtn.textContent = 'Extracting...';
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
@@ -52,54 +253,18 @@ document.addEventListener('DOMContentLoaded', function() {
         target: { tabId: tabs[0].id },
         function: scrapeStats
       }, (injectionResults) => {
-        statsResult.innerHTML = '';
         for (const frameResult of injectionResults) {
           const posts = frameResult.result;
           extractedData = posts;
           if (posts && posts.length > 0) {
-            const table = document.createElement('table');
-            table.innerHTML = `
-              <thead>
-                <tr>
-                  <th>Author</th>
-                  <th>Content</th>
-                  <th>Impressions</th>
-                  <th>Likes</th>
-                  <th>Comments</th>
-                  <th>Reposts</th>
-                  <th>Total Engagement</th>
-                  <th>URL</th>
-                  <th>Date</th>
-                  <th>Post ID</th>
-                </tr>
-              </thead>
-              <tbody>
-              </tbody>
-            `;
-            const tbody = table.querySelector('tbody');
-            posts.forEach(post => {
-              const row = document.createElement('tr');
-              row.innerHTML = `
-                <td><a href="${post.authorProfile}" target="_blank">${post.authorName}</a></td>
-                <td>${post.content}</td>
-                <td>${post.impressions}</td>
-                <td>${post.likes}</td>
-                <td>${post.comments}</td>
-                <td>${post.reposts}</td>
-                <td>${post.totalEngagement}</td>
-                <td><a href="${post.postUrl}" target="_blank">View Post</a></td>
-                <td>${post.datePosted}</td>
-                <td>${post.postId}</td>
-              `;
-              tbody.appendChild(row);
-            });
-            statsResult.appendChild(table);
-            copyJsonBtn.style.display = 'inline-block';
+            renderTable(posts);
             extractStatsBtn.disabled = false;
             extractStatsBtn.textContent = 'Extract Stats';
           } else {
+            statsResult.innerHTML = '';
             statsResult.textContent = 'No stats found.';
             copyJsonBtn.style.display = 'none';
+            configColumnsBtn.style.display = 'none';
             extractedData = [];
             extractStatsBtn.disabled = false;
             extractStatsBtn.textContent = 'Extract Stats';

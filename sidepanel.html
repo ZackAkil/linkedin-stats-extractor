@@ -29,6 +29,17 @@
       </li>
     </ol>
     <button id="copyJsonBtn" style="display: none">Copy as JSON</button>
+    <button id="configColumnsBtn" style="display: none">Configure Columns</button>
+    <div id="columnConfig" style="display: none">
+      <h3>Configure Column Order</h3>
+      <p>Use arrows to reorder, checkboxes to show/hide:</p>
+      <ul id="columnList"></ul>
+      <div class="config-buttons">
+        <button id="saveColumnOrderBtn">Save Order</button>
+        <button id="resetColumnOrderBtn">Reset to Default</button>
+        <button id="cancelColumnOrderBtn">Cancel</button>
+      </div>
+    </div>
     <div id="statsResult"></div>
     <script src="sidepanel.js"></script>
   </body>

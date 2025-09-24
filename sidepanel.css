@@ -85,3 +85,141 @@ th, td {
 th {
   background-color: #f2f2f2;
 }
+
+#configColumnsBtn {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  padding: 8px;
+  box-sizing: border-box;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+#columnConfig {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 15px;
+  margin-top: 10px;
+}
+
+#columnConfig h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+#columnList {
+  list-style: none;
+  padding: 0;
+  margin: 15px 0;
+}
+
+#columnList li {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  padding: 10px;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.column-controls {
+  display: flex;
+  flex-direction: column;
+  margin-right: 10px;
+  gap: 2px;
+}
+
+.arrow-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow-btn:hover:not(:disabled) {
+  background: #0077b5;
+  color: white;
+  border-color: #0077b5;
+}
+
+.arrow-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+#columnList label {
+  flex-grow: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+#columnList input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.config-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+#saveColumnOrderBtn, #cancelColumnOrderBtn, #resetColumnOrderBtn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+#saveColumnOrderBtn {
+  background-color: #28a745;
+  color: white;
+}
+
+#saveColumnOrderBtn:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+#saveColumnOrderBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+#resetColumnOrderBtn {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+#resetColumnOrderBtn:hover:not(:disabled) {
+  background-color: #e0a800;
+}
+
+#resetColumnOrderBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+#cancelColumnOrderBtn {
+  background-color: #6c757d;
+  color: white;
+}
+
+#cancelColumnOrderBtn:hover {
+  background-color: #5a6268;
+}
